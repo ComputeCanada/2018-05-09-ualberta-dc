@@ -208,13 +208,7 @@ eventbrite:  "45202577125"         # optional: alphanumeric key for Eventbrite r
 {% endcomment %}
 <h2 id="schedule">Schedule</h2>
 
-{% if page.carpentry == "swc" %}
-  {% include sc/schedule.html %}
-{% elsif page.carpentry == "dc" %}
-  {% include dc/schedule.html %}
-{% elsif page.carpentry == "lc" %}
-  {% include lc/schedule.html %}
-{% endif %}
+The exact schedule is still under construction and will be shared here when complete.  Either Python or R will be the featured language.
 
 {% comment %}
   Collaborative Notes
