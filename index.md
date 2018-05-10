@@ -226,7 +226,7 @@ eventbrite:  "45202577125"         # optional: alphanumeric key for Eventbrite r
   <div class="col-md-6">
     <h3>Day 2</h3>
     <table class="table table-striped">
-      <tr> <td>09:00</td>  <td>Begin <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC1basics.html">R and R Studio Basics</a></td> </tr>
+      <tr> <td>09:00</td>  <td>Begin <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC1basics.html">R and R Studio Basics</a>. <a href="http://www.datacarpentry.org/r-socialsci/">Originally Planned Content</a> from Data Carpentry Social Sciences page (seems to now be fixed).</td> </tr>
       <tr> <td>10:30</td>  <td>Break</td> </tr>
       <tr> <td>10:45</td>  <td>Finish <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC1basics.html">R and R Studio Basics</a> and begin <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC2ReadClean.html"> Cleaning Data</a></td> </tr>
       <tr> <td>12:00</td>  <td>Lunch break</td> </tr>
