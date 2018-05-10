@@ -1,0 +1,268 @@
+---
+title: 'Data Carpentry 1: Intro to R'
+author: "Brian Rusk"
+date: "July 12th & 13th, 2017"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+## Getting Started
+
+Please install software in this order before we begin:
+
+1. R from <https://cran.r-project.org/>
+2. RStudio from <https://www.rstudio.com/products/rstudio/#Desktop>
+
+Then open RStudio and run the code below in the `Console` pane of RStudio.
+```{r, eval = FALSE}
+install.packages("tidyverse") # Copy on the Console command line and hit Return or Enter
+```
+
+## Introduction to R
+
+R is a free and open-source programming language for statistical computing and graphics. It is supported by a multinational collaborative team known as the 'R core team'. These people update R on a continuous basis. The current R version should be 3.4.1 (Single Candle; note that version names are all selected from old Peanuts comics). However, in using R you will use packages that have been written by others. You can learn more about R from <https://www.r-project.org/>.
+
+The software can be downloaded from <https://cran.r-project.org/>, The Comprehensive R Archive Network. This archive stores packages that you can download and use for specific purposes. For example, if you work with geographic GIS data you may want to download the `rgeos` package for calculating distances taking into account Earth's curvature. Or maybe you work with financial data and you need to do bond valuations so you could use the `quantmod` package. However, to use either package or on of their alternatives, we need to become familiar with basic R commands.
+
+## Introduction to RStudio
+
+RStudio is __not__ R. RStudio is a private company that produces the RStudio _integrated development environment_ for R. Nevertheless, in keeping with the general ethos of R, the RStudio IDE is also free and open-source. RStudio is essentially a working platform that will let you get more out of R. It can be downloaded from <https://www.rstudio.com/products/rstudio/#Desktop>. Keep in mind, however, that when you are running RStudio you are running two programs. This is important because updating one does not update the other. RStudio makes R much more user friendly so we will be using in this workshop.
+
+## R Demo
+
+`Insert 8-bit Musical Interlude`
+
+## R as a Calculator
+
+#### Basics
+At its heart, R is just an elaborate calculator.
+
+```{r}
+2 + 2 # Adds the two numbers
+```
+
+```{r}
+4 - 2
+```
+```{r}
+5 * 4
+```
+
+```{r}
+ 100 / 5
+```
+```{r}
+101 /5
+```
+
+```{r}
+101 %/% 5 # Just gives the number of complete times 5 goes into 100.
+```
+```{r}
+101 %% 5 # Modulo just gives the remainder.
+```
+
+#### Assigning Result Values to an Object
+
+Note that only the final line prints an output. The others create an object in your `Global Environment`.
+```{r}
+a <- 2 + 2 # Assigns the result to the object 'a'
+b = 3 + 3 # The equals sign also works for assignment, but I will always use " <- " to assign something to an object.
+c <- a + b
+c # Returns the value of c
+```
+
+## Basic Data Classes
+
+The objects we create can be of different types. One of the most basic types is a `vector`, an object with more than one value. Vectors, however, can only have a single data type, or class. Knowing the data class you are working with is extremely important. When you experience problems in R, besides typos, like leaving out a commma or bracket, trying to perform an operation on the wrong kind of data is one of the most common types of errors.
+
+Some simple number vectors:
+```{r}
+vec_a <- 1:20
+```
+
+```{r}
+vec_b <- c(1, 4, 8, 9, 3, 2) # We use c() to concatenate values
+```
+
+```{r}
+vec_c <- rep(c(vec_b), each = 3) # instead of 'each =' we could also use 'times =' or 'length.out ='
+```
+
+```{r}
+vec_d <- c(1.1, 3.3)
+```
+
+Some simple character vectors:
+```{r}
+peopleNames <- c("Hadley", "Jenny", "Hilary", "Yihui")
+```
+
+```{r}
+vec_f <- c("1", "2", "3", "4", "5")
+```
+
+A logical vector
+```{r}
+logical_a <- c(TRUE, FALSE, FALSE, TRUE, FALSE)
+```
+
+The `str()` function, short for 'structure', is extremely useful for determining the data class (or object type) of an object. See the difference between `vec_b` and `vec_f`. To us, they both include numbers, but to R `vec_b` is a numeric vector and `vec_f` is a character vector.
+
+```{r}
+str(vec_b)
+```
+```{r}
+str(vec_f)
+```
+
+Try running `str()` on several of the other objects we've created.
+
+#### Coercion
+
+So what happens if we try to create vector out of different data classes? Let's find out!
+```{r}
+vec_g <- c(1, "one", TRUE)
+str(vec_g)
+```
+
+What happened? Why?
+
+Let's try another example:
+```{r}
+vec_h <- c(1, TRUE, 0, FALSE)
+str(vec_h)
+```
+
+Did the same thing happen? What's the explanation for this?
+
+#### Factors
+
+Factors are more or less just another data class, but vectors need to be told that they are factors for them to be so.
+```{r}
+fac_a <- factor(c("red", "blue", "green"))
+str(fac_a)
+```
+
+Factors can be unordered like `fac_a`, where each colour could just be an attribute of a real item being counted, like a car, or factors can be ordered. Ordered factors make sense for things that have levels like 'High', 'Medium', and 'Low'; or 'First', 'Second' and 'Third', etc.
+```{r}
+fac_b <- factor(c("Good", "Better", "Good", "Best", "Better"), levels = c("Good", "Better", "Best"),  ordered = TRUE)
+str(fac_b)
+```
+
+So what happens if we try to add an element to the factor?
+```{r}
+vec_i <- c(fac_b, TRUE)
+str(vec_i)
+```
+```{r}
+vec_j <- c(fac_b, "Bad")
+str(vec_j)
+```
+
+
+Be warned!
+
+## Basic Object Types
+
+R objects can come in a variety of types. The most commonly used are `vectors` (including `factors`), `matrices`, `data frames` and `lists`. We have covered vectors. Matrices are similar to vectors in that they can only include a single data class, but are two dimensional, having both rows and columns.
+
+A simple matrix:
+```{r}
+mat_a <- matrix( c('a','a','b','c','b','a'), nrow = 2, ncol = 3, byrow = TRUE)
+mat_a
+```
+
+Changing the `byrow =` option:
+```{r}
+mat_b <- matrix( c('a','a','b','c','b','a'), nrow = 2, ncol = 3, byrow = FALSE)
+mat_b
+```
+
+A numeric matrix:
+```{r}
+mat_c <- matrix(1:6, nrow = 2, ncol = 3, byrow = TRUE)
+mat_c
+```
+Multiplying by matrices:
+```{r}
+mat_d <- matrix(1:6, nrow = 2, ncol = 3, byrow = FALSE)
+mat_c * mat_d
+```
+
+If you work with data formatted in spreadsheets, and I think most people do, you will most often keep your data in a data frame. Data frames are great because they can take multiple data classes stored in different columns. R comes with some example datasets, most of which are not very interesting. You will often see tutorials on the web that use either `mtcars` or `iris` in their examples. These do not show up in your environment pane, but they are there. Let's look at the `iris` data. 
+
+First let's look at the dimensions of `iris`.
+```{r}
+dim(iris)
+```
+It has 150 rows and 5 columns. We probably do not want to just output the 150 rows into our console so we can get a look at the data in a couple of ways. We can look at the `head()` of the data (or even `tail()`).
+```{r}
+head(iris)
+```
+This gives us the first 6 rows as a default. `head(iris, 8)` would give us the first 8 rows. If we run `str()` on `iris` we see that there are indeed different data classes in one object. The Species column is a factor, while all the other columns are numeric.
+```{r}
+str(iris)
+```
+
+
+You can create data frames yourself by using `data.frame()` on vectors that have equal length.
+```{r}
+vec_a <- 1:12 # This deletes our old vec_a permanently and without warning.
+vec_b <- sample(1:100, size = 12, replace = TRUE) # Randomly sampling 12 numbers between 1 and 100 with replacement (meaning you could get the number 88 twice). You will get different numbers every time you run this.
+fac_a <- rep(fac_a, times = 4) # fac_a had a length() of 3 but now it is length 12
+peopleNames <- rep(peopleNames, each = 3) # What happens if you run this line and the one above it multiple times (DON'T TRY IT.)
+
+df_a <- data.frame(vec_a, vec_b, fac_a, peopleNames)
+head(df_a)
+```
+
+There is a lot to know about data frames, but we'll save that for the Reading Data into R and Cleaning Data sections. 
+
+The final object is a list. Lists can be comprised of anything. They can be very useful, but we will not talk much about them here. The following code creates a list of the data frames `mtcars` and `iris`, a single character value, a single numeric value, a logical vector, and I even included a character string for good measure.
+```{r}
+list_a <- list(mtcars, iris, "a", 1, c(TRUE, FALSE, FALSE), "the kitchen sink")
+```
+
+We will talk more about how to get values out of lists, data frames and matrices later.
+
+## Working Directory and Creating an R Project
+
+When working with R it is important to know your working directory. You can find out your working directory by running:
+```{r, eval = FALSE}
+getwd()
+```
+
+You can set your working directory by inserting a pathname into `setwd()`, or by doing this in RStudio by clicking on the Session dropdown menu.
+```{r, eval = FALSE}
+setwd("/Users/brian/Dropbox/db_documents/HomeRwork/DataCarpentry")
+```
+
+A good way to keep your R work organized, however, is to create an R Project. Projects are created in their own folder and will keep R scripts, and saved plots or data there. You can create a new project by clicking ong the R Project Icon in the top right corner of your RStudio window and selecting 'New Project'. You can choose either to create a new directory (folder) or to use an existing one. Let's all create a project in a folder called 'DataCarpentry'.
+
+## A Few Tips and Tricks Going Forward
+
+The RStudio IDE has many useful commands for making programming in R easier. You can learn about more of these by downloading the RStudion cheatsheet at <https://www.rstudio.com/resources/cheatsheets/>. (The others are great, too - especially the data vis and data transformation ones.)
+
+Try this: Click on the console and press the up arrow on your keyboard. It gives the last command that you ran. Pretty standard stuff. However, if you want to know about the last few times you ran a particular command, or created certain objects type a few letters and then press `Ctrl` (Windows) or `Cmd` (Mac) and Up. Let's see the code we used to create the vectors. Type `vec`, then `Cmd` + Up. This is extremely useful. (Unless otherwise noted, if Mac is `Cmd`, Windows is `Ctrl`.)
+
+Some other useful shortcuts:
+
+1. `Cmd`+`Shift`+`F` - Look for text in a folder.
+2. `Cmd`+`Shift`+`C` - Comments or uncomments a block of code.
+3. `Shift`+`Alt`+`Up/Down` (Win); `Cmd`+`Option`+`Up/Down` (Mac) - Copies the present line of code above or below.
+4. `Cmd`+`Option`+`Click` (Try `Shift`+`Alt`+`Click` on Windows) - Creates multiple cursors.
+
+## A Word about R Scripts, Undo, and Reproducability
+
+1. Open a new R Script (Top left corner). 
+2. Type: `newVec <- 1:12`.
+3. With your cursor at the end of that line, press `Cmd`+`Return`.
+4. Change the line you typed to: `newVec <- "Oops!"`
+5. Run step 3 again.
+6. Try to undo.
+
+What happens? This is one of the best features of R (or similar ways of analyzing data like Python). This behaviour means we should alter the way many of us typically use software and think about how to make our work easily reproducible. While many new users think of the objects as they exist within the R Environment as the important output of their labour this view is incorrect. What you should be aiming to produce is a reproducable R script. This does not mean that most R Scripts will not contain a bunch of rough R code. It means that at least one of your open scripts should contain good work that contains lots of comments that would help you (or someone else) if you came back to it six months later. The command `rm(list = ls())` removes everything in your R Environment (but not your History). If you are doing things correctly, you have a script that you could simply 'source' and get everything back again if everything were to be deleted. Working this way is the ideal. I do not always fully do this, and some datasets or models take a loooong time to load and run so just re-running a script can sometime be impractical, but the point here is that you should not get too attached to objects in your environment, but rather pay attention to the code that created them.
+
+## Up Next: Reading In and Cleaning Data

@@ -1,0 +1,362 @@
+---
+title: 'DC 3: Plotting Data'
+author: "Brian Rusk"
+date: "July 12th & 13th, 2017"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+## Packages
+
+These packages are used in this lesson:
+```{r, eval = FALSE}
+library(ggplot2)
+library(dplyr)
+library(ggthemes) # install.packages("ggthemes")
+library(hflights) # install.packages("hflights")
+```
+
+```{r, include = FALSE}
+library(ggplot2)
+library(dplyr)
+library(ggthemes) # install.packages("ggthemes")
+library(hflights) # install.packages("hflights")
+```
+
+```{r, include = FALSE}
+library(readr)
+MTcars <- read_csv("MTcars.txt", col_names = FALSE, skip = 1)
+MTcarsNames <- as.character(read_csv("MTcars.txt", col_names = FALSE, n_max = 1))
+MTcarsNames <- gsub(pattern = "\"", replacement = "", MTcarsNames) # Note the order of the arguments
+MTcarsNames <- c("model", MTcarsNames)
+names(MTcars) <- MTcarsNames
+LeisureAttend <- read.csv(url("https://dashboard.edmonton.ca/api/views/iaa7-x8kk/rows.csv"))
+LeisureAttend <- filter(LeisureAttend, MONTHLY_ATTENDANCE != 0)
+```
+
+## Base Graphics
+
+R bills itself as a language and environment for statistical computing _and_ graphics, and base R has some pretty decent capabilities. However, the `ggplot2` package is ultimately more versatile and easier to use. If you should end up using `ggplot2` anyway, then we will spend more time on this. There are some very useful base R plots, and I'll cover those, but we will not spend much time customizing them. (I admit, I have actually forgotten most of what I did at one time know about base R graphics).
+
+As I mentioned, when your data grows very large (think: 30 columns and millions of rows), taking a look at the data is not going to be very informative. This is why we want functions like `mean()` or `summary()`. Sometimes though, a picture is worth 1000 words and a simple plot can help us understand what we are looking at. Most useful among these are histograms, density plots, and scatterplots. For example a histogram or a density plot can tell us if the data is normally distributed, which is an assumption of many statistical tests.
+
+```{r}
+hist(iris$Sepal.Length[iris$Species == "setosa"])
+```
+
+Naturally there are many options for `hist()` but it is most useful for just letting the analyst visualize the data. 
+```{r}
+hist(iris$Sepal.Length[iris$Species == "setosa"], breaks = 10, col = "blue", xlab = "Sepal Length", 
+  	main = "Histogram for Setosa")
+```
+
+
+```{r}
+plot(density(iris$Petal.Length[iris$Species == "virginica"]))
+```
+
+As we saw, scatterplots can give us a quick visualization of relationships.
+```{r}
+plot(MTcars$disp, MTcars$hp)
+```
+
+We can even produce a scatterplot matrix to look at multiple relationships.
+
+
+We can even create a scatterplot matrix to see multiple relationships in the data.
+```{r}
+pairs(~Sepal.Length + Sepal.Width + Petal.Length + Petal.Width,data=iris, main = "Simple Scatterplot Matrix")
+```
+
+We can see that there is a more clear relationship between petal length and width than there is between sepal length and width. 
+
+```{r}
+plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species, pch = 2)
+legend(6.8, 4.4, unique(iris$Species), col = 1:length(iris$Species), pch = 2)
+```
+
+Adding some colour helps to see what is going on here. In short, you can do a lot with 'base' graphics.
+
+
+## GGplot2
+
+The 'GG' in `ggplot2` stands for 'grammar of graphics'. The general idea is that there should be rules for hierarchically organizing information into a data visualization. This is actually quite complex and mostly beyond the scope of what we want to do today. The essential idea is that in a simple plot there are `x` and `y` coordinates and then additional information layers are added on (like the mapping of colour onto `iris$Species`, above). I will argue that this creates a simple, transparent, and powerful approach to creating visualizations. You can still end up with chunks of code like below to create a single plot, but the important thing is that it will (eventually - likely not today) be clear what the code is doing. And normally, you can get what you want with much less code.
+
+```{r, eval = FALSE}
+theme_tufteNL <- function (base_size = 20, base_family = "serif", ticks = TRUE) 
+{
+	ret <- theme_bw(base_family = base_family, base_size = base_size) + 
+		theme(legend.position="right", legend.background = element_blank(), legend.key = element_blank(),
+			panel.background = element_blank(), panel.border = element_blank(), 
+			strip.background = element_blank(), plot.background = element_blank(), 
+			axis.line = element_blank(), panel.grid = element_blank())
+	if (!ticks) {
+		ret <- ret + theme(axis.ticks = element_blank())
+	}
+	ret
+}
+
+
+AllSta <- ggplot(AllIA1GrandAvgS, aes(x = (IDX*20), y = mean, color = IA)) + 
+	geom_line() + 
+	geom_errorbar(aes(ymin = mean - se, ymax = mean + se), alpha = .4, width = 0.3) + 
+	geom_vline(xintercept = vlineStcueMeans, alpha = 0.5) + 
+	geom_vline(xintercept = vlineStcueSD, linetype = "longdash", alpha = 0.5) + 
+	scale_x_continuous(breaks = seq(0, 6000, 1000)) + scale_y_continuous(breaks = seq(0, .8, .2)) + 
+	labs(title = "Statements", y = NULL, x = "Time") + 
+	facet_grid(ModGroup ~.) + 
+	theme_tufteNL2()
+```
+
+![The code above creates this plot.](PlotExampleDC.png)
+
+## Simple Plot (Scatter)
+
+```{r}
+# library(ggplot2)
+aa <- ggplot(MTcars, aes(x = hp, y = qsec)) # The data we want to plot. "ggplot(MTcars, aes(hp, qsec))" would also work.
+```
+We have the data that we are going to plot. `aes()` means 'aesthetic'.
+
+Now to our data layer, we can add a 'geom' that maps the numerical data onto points.
+```{r}
+aa + geom_point()
+bb <- aa + geom_point()
+```
+We called the plot in the first line, and then assigned the plot to `bb` with the next. Let's add a line that shows the relationship.
+
+```{r}
+bb + geom_smooth()
+```
+
+Constructing the plot this way is the same as writing it into one call like below.
+```{r, eval = FALSE}
+ggplot(MTcars, aes(hp, qsec)) +
+	geom_point() +
+	geom_smooth()
+```
+
+We can also add a `colour' layer into the `aes()` function.
+
+```{r, warning = FALSE}
+ggplot(MTcars, aes(hp, qsec, colour = cyl)) +
+	geom_point() +
+	geom_smooth()
+```
+
+Is this the way we want our plot to look? How can we fix it? Think about what I said is often a source of problems. (We'll get to labels later.)
+
+```{r}
+MTcars$cyl <- as.factor(MTcars$cyl)
+ggplot(MTcars, aes(hp, qsec, colour = cyl)) +
+	geom_point() +
+	geom_smooth()
+```
+
+This is not a great plot, but that has most to do with how `hp` is in explaining `qsec` times. Creating a new column that is a ratio of `hp` in relation to `wt` (weight) would be better. We have (at least) two ways of creating this column.
+
+```{r}
+MTcars <- MTcars %>% # This uses the dplyr package
+	mutate(hp2wt = hp/wt)
+```
+or
+```{r}
+MTcars$hp2wtB <- MTcars$hp/MTcars$wt
+identical(MTcars$hp2wt, MTcars$hp2wtB)
+```
+As we can see, these did exactly the same thing. Let's get rid of `MTcars$hp2wtB`.
+```{r}
+MTcars$hp2wtB <- NULL
+```
+
+Now we will use the new column `hp2wt` as the new `x` variable.
+```{r}
+ggplot(MTcars, aes(hp2wt, qsec, colour = cyl)) +
+	geom_point() +
+	geom_smooth()
+```
+
+Our confidence intervals are not very informative because of the overlap. We can fix this by setting the `fill` (not `colour`) argument in the `aes()` of `geom_smooth()`.
+
+```{r}
+ggplot(MTcars, aes(hp2wt, qsec, colour = cyl)) +
+	geom_point() +
+	geom_smooth(aes(fill = cyl))
+```
+
+## Barplots
+
+To make some barplots, we will first use the `hflights` dataset from the package of the same name. This dataset shows all the flights that left Houston, Texas's two airports in 2011. Let's take a look at the dataset.
+
+```{r, eval = FALSE}
+head(hflights)
+glimpse(hflights)
+summary(hflights)
+```
+
+Running the line...
+
+```{r}
+sort(table(hflights$Dest))
+```
+... we can see that the most frequent destination for these flights was a place called 'DAL', which means Dallas, Texas, but these were not the only flights to Dallas, as 'DFW' means Dallas/Fort Worth International Airport. If we wanted to know which carriers operated the most flights to the Dallas area, what would we do?
+
+```{r}
+# Let's use 'filter()' and the pipe operator.
+```
+
+
+```{r, include = FALSE}
+DALhfli <- hflights %>%
+	filter(Dest %in% c("DAL", "DFW")) 
+DALhfli <- within(DALhfli, UniqueCarrier <- factor(UniqueCarrier, levels = names(sort(table(UniqueCarrier), decreasing = TRUE))))
+ggplot(DALhfli, aes(UniqueCarrier)) + geom_bar()
+aa <- ggplot(DALhfli, aes(UniqueCarrier, fill = Dest)) + geom_bar()
+```
+
+What does the plot below show us? How would we recreate it?
+```{r, echo = FALSE}
+aa
+```
+
+```{r, eval = FALSE}
+DALhfli <- hflights %>%
+	...
+DALhfli <- within(DALhfli, UniqueCarrier <- factor(UniqueCarrier, levels = names(sort(table(UniqueCarrier), decreasing = TRUE)))) # Let's not worry about what this does at the moment.
+ggplot(DALhfli, ...
+```
+
+Obviously, we want to make visualizations of our data so that we can communicate relevant insights with our audiences. However, making visualizations can tell us a lot about the data that we work with. Previously, I showed you a barplot of the `LeisureAtt` data that looked like this.
+
+```{r, echo = FALSE}
+ggplot(LeisureAttend, aes(x = REPORT_PERIOD, y = MONTHLY_ATTENDANCE)) + geom_bar(stat = "identity") + theme(axis.text.x  = element_text(angle=60, hjust = 1, vjust=1, size=8))
+```
+
+The plots are a similar format, but there is something drastically different about the format of the datasets. What is it? The code below _should_ create (roughly) the plot above, but it does not. We will work around this in the next section.
+
+```{r, eval = FALSE}
+ggplot(LeisureAttend, aes(REPORT_PERIOD, MONTHLY_ATTENDANCE)) + geom_bar()
+```
+
+#### Setting Labels, etc.
+Let's use the `LeisureAttend` dataset to make a polished barplot. 
+
+```{r}
+aa <- ggplot(LeisureAttend, aes(REPORT_PERIOD, MONTHLY_ATTENDANCE)) + geom_bar(stat = "identity")
+aa
+```
+
+This rough plot has multiple problems. First of all, there appears to be a lot of variation by both month, and year. Maybe it is good that the dataset reflects the timeseries nature of the data, but this layout makes it hard to make comparisons directly. It should be no surprise that there is always a big drop in attendance between August and September. Maybe it would be better to group the data by months rather than the sequentially arranged variable, `REPORT_PERIOD`. We can do this like this.
+
+```{r}
+aa <- ggplot(LeisureAttend, aes(x = MONTH, y = MONTHLY_ATTENDANCE, fill = as.factor(YEAR)))
+aa + geom_bar(stat = "identity")
+```
+
+Let's re-arrange the bars for better comparison.
+```{r}
+bb <- aa + geom_bar(stat = "identity", position = "dodge")
+bb
+```
+
+How did we change the 'LeisureAtt` dataset so that `MONTH` was arranged by time rather than alphabetically? Let's do that to `LeisureAttend`, as well.
+```{r}
+LeisureAttend$MONTH <- factor(LeisureAttend$MONTH, levels = toupper(month.name))
+# Now go back and recreate 'aa' and 'bb'
+```
+Yes, we will finally deal with the text on the x-axis now.
+
+```{r}
+cc <- bb + theme(axis.text.x  = element_text(angle = 60, hjust = 1, vjust = 1, size = 8))
+cc
+```
+
+Better, but how readable is that y-axis?
+
+```{r}
+dd <- cc + scale_y_continuous("ATTENDANCE", labels = scales::comma)
+dd
+```
+
+How about the legend title?
+
+```{r}
+ee <- dd + guides(fill = guide_legend(title = "Year")) # There are at least five different ways to do this. This isn't my favourite.
+ee
+```
+
+And I would be lying to say I like the colours in this plot. Let's try something else.
+
+```{r, warning = FALSE}
+ff <- ee + scale_fill_brewer(palette = "YlGnBu")
+ff
+```
+
+This produces the same result as below (which is how I would normally do it).
+
+```{r}
+ggplot(LeisureAttend, aes(x = MONTH, y = MONTHLY_ATTENDANCE, fill = as.factor(YEAR))) + 
+	geom_bar(stat = "identity", position = "dodge") + 
+	theme(axis.text.x  = element_text(angle=60, hjust = 1, vjust=1, size=8)) + 
+	scale_y_continuous("ATTENDANCE", labels = scales::comma) +
+	guides(fill = guide_legend(title = "Year")) +
+	scale_fill_brewer(palette="YlGnBu")
+```
+
+To see some other ways we could change our plot we can use the `ggthemes` package in two ways. First, we can check out some of the themes. Have a look at the vignette by running: `vignette("ggthemes")`.
+
+```{r}
+ff + theme_tufte()
+ff + theme_fivethirtyeight()
+ff + theme_classic() # * from ggplot2
+```
+
+Naturally, they change the theme of the plot, but even more valuable than that is running them without the '()'. Running them this way, we can see some additional options that we can alter. 
+
+```{r, eval = FALSE}
+theme_tufte
+```
+
+#### Exercise
+
+Try changing one aspect of the plot `ff` (this will be easier if you use the large code block above). Try doing a google search for adding a title, (add title ggplot2), changing the y-axis label (change y axis label ggplot2), or making the legen title bold... or whatever you want.
+
+
+## Bad Barplots
+
+Read in the dataset and take a look.
+```{r}
+dat <- read_csv("dat.csv")
+datSum <- dat %>%
+	group_by(Key) %>% 
+	summarise(mean = mean(Value), upper = mean(Value) - sd(Value), lower = mean(Value) + sd(Value))
+datSum
+```
+
+Let's make a plot from the summary data.
+```{r}
+ggplot(data = datSum, aes(x = Key, y = mean)) + geom_bar(stat = "identity") + geom_errorbar(data = datSum, aes(x = Key, ymin = upper, ymax = lower), width = 0.2, size = 1, color = "blue") 
+```
+
+But, does this plot tell the truth?
+
+```{r}
+ggplot(dat, aes(Value, fill = Key)) + geom_density(alpha = .5)
+```
+
+This is what the data distributions actually look like, even though they have the same mean and same standard deviation.
+
+And, in fact, there's a statistically significant difference between the two distributions.
+```{r}
+wilcox.test(dat$Value[dat$Key == "A"], dat$Value[dat$Key == "B"])
+# t.test(dat$Value[dat$Key == "A"], dat$Value[dat$Key == "B"])
+```
+
+If you are ever tempted to make a bar plot with error bars, use a boxplot instead.
+```{r}
+ggplot(dat, aes(Key, Value)) + geom_boxplot()
+```
+
+
+

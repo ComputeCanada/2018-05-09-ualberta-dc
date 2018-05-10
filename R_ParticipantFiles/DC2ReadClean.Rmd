@@ -1,0 +1,378 @@
+---
+title: 'DC 2: Reading In and Cleaning Data'
+author: "Brian Rusk"
+date: "July 12th & 13th, 2017"
+output:
+  html_document: default
+  html_notebook: default
+---
+#### Packages Used
+
+```{r, include = FALSE}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+```{r, eval = FALSE}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+
+## Reading in and Cleaning "Flatfiles"
+
+I think when most new R users (and most R users in general) think of datasets, they think in terms of a spreadsheet format. This conceptual layout is often referred to as a flatfile, as it is a two dimensional layout without hierarchical relationships to other data, as is the case in a relational database. We will only work with this spreadsheet-style data in this workshop.
+
+When a lot of people think 'spreadsheet', they think a .xlsx file. The .xlsx format works very well for some types of data like budgets or class grades, but it really is not suitable for larger datasets. How attractive does opening an .xlsx file with several millions of rows and a hundred columns sound? And some of Excel's 'smart' features can have very stupid consequences. ([Check out this nightmare](http://www.sciencemag.org/news/sifter/one-five-genetics-papers-contains-errors-thanks-microsoft-excel).)
+
+In R, it is more common to use plain text files. These could have the extensions .csv or just .txt. Either way they are just text. Copy and paste the text below into a plain text editor (You can do this in RStudio, too), and save it in your project/working directory as "MTcars.txt".
+
+```{r, eval = FALSE}
+"mpg", "cyl", "disp", "hp", "drat", "wt", "qsec", "vs", "am", "gear", "carb"
+"Mazda RX4", 21, 6, 160, 110, 3.9, 2.62, 16.46, 0, 1, 4, 4
+"Mazda RX4 Wag", 21, 6, 160, 110, 3.9, 2.875, 17.02, 0, 1, 4, 4
+"Datsun 710", 22.8, 4, 108, 93, 3.85, 2.32, 18.61, 1, 1, 4, 1
+"Hornet 4 Drive", 21.4, 6, 258, 110, 3.08, 3.215, 19.44, 1, 0, 3, 1
+"Hornet Sportabout", 18.7, 8, 360, 175, 3.15, 3.44, 17.02, 0, 0, 3, 2
+"Valiant", 18.1, 6, 225, 105, 2.76, 3.46, 20.22, 1, 0, 3, 1
+"Duster 360", 14.3, 8, 360, 245, 3.21, 3.57, 15.84, 0, 0, 3, 4
+"Merc 240D", 24.4, 4, 146.7, 62, 3.69, 3.19, 20, 1, 0, 4, 2
+"Merc 230", 22.8, 4, 140.8, 95, 3.92, 3.15, 22.9, 1, 0, 4, 2
+"Merc 280", 19.2, 6, 167.6, 123, 3.92, 3.44, 18.3, 1, 0, 4, 4
+"Merc 280C", 17.8, 6, 167.6, 123, 3.92, 3.44, 18.9, 1, 0, 4, 4
+"Merc 450SE", 16.4, 8, 275.8, 180, 3.07, 4.07, 17.4, 0, 0, 3, 3
+"Merc 450SL", 17.3, 8, 275.8, 180, 3.07, 3.73, 17.6, 0, 0, 3, 3
+"Merc 450SLC", 15.2, 8, 275.8, 180, 3.07, 3.78, 18, 0, 0, 3, 3
+"Cadillac Fleetwood", 10.4, 8, 472, 205, 2.93, 5.25, 17.98, 0, 0, 3, 4
+"Lincoln Continental", 10.4, 8, 460, 215, 3, 5.424, 17.82, 0, 0, 3, 4
+"Chrysler Imperial", 14.7, 8, 440, 230, 3.23, 5.345, 17.42, 0, 0, 3, 4
+"Fiat 128", 32.4, 4, 78.7, 66, 4.08, 2.2, 19.47, 1, 1, 4, 1
+"Honda Civic", 30.4, 4, 75.7, 52, 4.93, 1.615, 18.52, 1, 1, 4, 2
+"Toyota Corolla", 33.9, 4, 71.1, 65, 4.22, 1.835, 19.9, 1, 1, 4, 1
+"Toyota Corona", 21.5, 4, 120.1, 97, 3.7, 2.465, 20.01, 1, 0, 3, 1
+"Dodge Challenger", 15.5, 8, 318, 150, 2.76, 3.52, 16.87, 0, 0, 3, 2
+"AMC Javelin", 15.2, 8, 304, 150, 3.15, 3.435, 17.3, 0, 0, 3, 2
+"Camaro Z28", 13.3, 8, 350, 245, 3.73, 3.84, 15.41, 0, 0, 3, 4
+"Pontiac Firebird", 19.2, 8, 400, 175, 3.08, 3.845, 17.05, 0, 0, 3, 2
+"Fiat X1-9", 27.3, 4, 79, 66, 4.08, 1.935, 18.9, 1, 1, 4, 1
+"Porsche 914-2", 26, 4, 120.3, 91, 4.43, 2.14, 16.7, 0, 1, 5, 2
+"Lotus Europa", 30.4, 4, 95.1, 113, 3.77, 1.513, 16.9, 1, 1, 5, 2
+"Ford Pantera L", 15.8, 8, 351, 264, 4.22, 3.17, 14.5, 0, 1, 5, 4
+"Ferrari Dino", 19.7, 6, 145, 175, 3.62, 2.77, 15.5, 0, 1, 5, 6
+"Maserati Bora", 15, 8, 301, 335, 3.54, 3.57, 14.6, 0, 1, 5, 8
+"Volvo 142E", 21.4, 4, 121, 109, 4.11, 2.78, 18.6, 1, 1, 4, 2
+```
+
+Now run this code.
+```{r}
+MT <- read.table("MTcars.txt", sep = ",", header = TRUE) 
+# The 'sep =' could be anything, but whitespace (" "), semicolon, and Tab ("\t") are also common.
+head(MT)
+```
+
+Because we knew that our values were comma-separated, we could have just used `read.csv()` which is just the `read.table()` function with the separator pre-set. (If you did not know previously, or have not guessed yet, the .csv extension means "Comma-Separated Values".)
+```{r}
+MT2 <- read.csv("MTcars.txt") # We could change the .txt to .csv, but it's unnecessary.
+identical(MT, MT2)
+```
+
+We can see that `read.csv()` is just a wrapper function for `read.table()` by entering `read.csv` (note the lack of parantheses).
+```{r}
+read.csv
+```
+
+`read.table()` has many more options/arguments as you can see from the output above. We can find out what these arguments are for any function by entering `?<function_name>`.
+```{r, eval = FALSE}
+?read.table
+```
+
+Most of these arguments have defaults and/or are optional so they do not need to be explicitly entered. See that the defaults for `strip.white` and `blank.lines.skip` are `FALSE` and `TRUE`, respectively. 
+
+Note also that at the top of the Help page it reads 'read.table {utils}'. This means that the function `read.table()` is part of the 'utils' package. There are several packages that are part of every R install. The most important of which are 'base', 'utils', 'stats', and 'graphics'. Additional packages can be installed from CRAN using the command `install.packages("<package_name>")`, or clicking the Packages tab in RStudio. Packages still need to be loaded to be used, however. This is done using the `library(<package_name>)` (quotes optional).
+
+The reason we are talking about packages here is that RStudio likes to use the 'readr' package to read in flatfiles. Let's use the 'Import Dataset' button on the Environment pane. Choose 'From CSV' and then 'Browse...'. Select and open the 'MTcars.txt' file. 
+
+RStudio gives us a preview of what is going to be read in. The readr package is an excellent package... but here, we have a problem. Where `read.csv()` worked perfectly, `read_csv()` is not going to. What are some possible solutions?
+
+```{r, eval = FALSE}
+library(readr)
+MTcars <- read_csv("<filepath>/MTcars.txt")
+head(MTcars)
+str(MTcars)
+```
+
+```{r, include = FALSE}
+library(readr)
+MTcars <- read_csv("MTcars.txt", col_names = FALSE, skip = 1)
+MTcarsNames <- as.character(read_csv("MTcars.txt", col_names = FALSE, n_max = 1))
+MTcarsNames <- gsub(pattern = "\"", replacement = "", MTcarsNames) # Note the order of the arguments
+MTcarsNames <- c("model", MTcarsNames)
+names(MTcars) <- MTcarsNames
+```
+
+
+```{r, include = FALSE}
+# library(readr)
+# MTcars <- read_csv("MTcars.txt")
+head(MTcars)
+str(MTcars)
+```
+Running `str()` on both `MTcars` and `MT` (or `MT2`), we can see there are some differences (besides our row names work around). What are they?
+
+We had problems because of row names. Row names were a bad feature. They should be an additional data column instead. Packages like readr and readxl are more consistent and often much faster than some of the base functionality in R. That said, I use both 'read.csv()' and 'read_csv()' to read in data. Loading and using different packages is a necessary thing to do.
+
+#### Selecting and Subsetting Data
+
+So we have a dataset `MTcars`. This dataset is tiny. We could probably get a reasonable grasp of the values that are contain within simply by eyeballing them. Our ability to do this rapidly diminishes as the dataset grows, however. To look at specific values we need to be able to find them in our dataset. The most basic way is to select a row and column numerically. Let's look at the `model` column of `MTcars`.
+
+```{r, warning=FALSE}
+MTcars[1,1] # This selects the first row and first column of MTcars
+MTcars[3,1] # The third value from the first column.
+MTcars[1:3,1] # The first three.
+MTcars[c(3, 6, 10, 20:23, 28),1] # A specific selection
+MTcars[seq(from = 1, to = nrow(MTcars), by = 2),1] # Can we tell what this did?
+```
+
+We can do the same with columns.
+
+```{r}
+MTcars[1,2] # The MPG value for the Mazda RX4
+```
+Does this return a single value? What happens when we `str()` it. Hold this thought.
+
+We can get all the values in the `mpg` column just by leaving rows blank. (This works for rows as well, of course).
+```{r}
+head(MTcars[,2])
+```
+
+We have another way of selecting values, and this way will just return the value. We use the dollar sign `$` which we can think of as meaning 'select'.
+
+```{r}
+head(MTcars$mpg)
+```
+Notice the difference in the output. This is a vector of values, not a dataframe (or tibble).
+
+```{r}
+MTcars$mpg[1] # This gives us the first value in the MPG column.
+str(MTcars$mpg[1])
+```
+
+With this knowledge we can get all sorts of info about our columns.
+```{r}
+mean(MTcars$hp, na.rm = TRUE) # The extra argument here removes NAs from the data. We don't have any, but I want you to see it.
+sd(MTcars$mpg) # Standard Deviation
+min(MTcars$qsec) # Seconds for a quarter mile. The MT stands for 'Motor Trend' magazine, after all.
+range(MTcars$qsec) 
+plot(MTcars$hp, MTcars$qsec) # Yep, more horsepower correlates with faster times
+# cor(MTcars$hp, MTcars$qsec) # Gives a negative correlation of -0.7082234
+```
+
+What if we only wanted to compare the tested cars that had manual transmissions. The column `am` means 'automatic/manual', with 'automatic' assigned the value zero and manual to the value 1. We could make a separate dataset. Here we have some options.
+
+__Subset with a Logical Vector__
+```{r}
+MTcars_man1 <- MTcars[MTcars$am == 1, ] # Note that we use a double "="
+head(MTcars_man1)
+```
+Let's think about what this did. `MTcars$am == 1` creates a logical vector of `TRUE` and `FALSE`. For all of the `TRUE` values, a row is kept in the new dataframe.
+
+__Subset with the Function `subset()`__
+```{r}
+MTcars_man2 <- subset(MTcars, am == 1)
+identical(MTcars_man1, MTcars_man2)
+```
+Two methods; same result.
+
+__Subset with `filter()`__
+A third method is to use the `dplr` package's `filter()`.
+```{r}
+library(dplyr)
+MTcars_man3 <- filter(MTcars, am == 1)
+identical(MTcars_man1, MTcars_man3)
+```
+Really?!
+```{r}
+table(MTcars_man1 == MTcars_man3)
+```
+If we run `str()` on `MTcars_man3` we see that there is some additional metadata in the dataframe. However, if we use the `table()` function, we can see that all the individual values in each cell are the same. So, the dataframes are the same.
+
+Now we can make a plot with just the manual transmission cars.
+```{r}
+plot(MTcars_man1$hp, MTcars_man1$qsec)
+# cor(MTcars_man1$hp, MTcars_man1$qsec) # An even stronger correlation here: -0.8494566
+```
+
+
+We do not need to make entirely new dataframes to get simple statistics. For example, we can get the mean of `hp` simply by subsetting within the function call.
+```{r}
+mean(MTcars$hp[MTcars$am == 1], na.rm = T)
+# mean(MTcars$hp[MTcars$am == 1], na.rm = T) == mean(MTcars_man1$hp, na.rm = T) # [1] TRUE
+```
+
+We can even put in a number of logical expressions. Can you figure out what happens in these function calls?
+```{r}
+mean(MTcars$hp[MTcars$am == 1 & MTcars$cyl > 4], na.rm = T)
+median(MTcars$hp[MTcars$am == 0 & MTcars$mpg <= 16], na.rm = T)
+range(MTcars$hp[MTcars$disp >= median(MTcars$disp) | MTcars$cyl >= 8], na.rm = T) # I'm using two criteria to select my 'big' engine cars.
+```
+
+Some of this code becomes very difficult even to read let alone to construct oneself. We never need to do things all in one line. If ran `range(MTcars$hp[MTcars$disp >= median(MTcars$disp) | MTcars$cyl >= 8], na.rm = T)` over multiple lines starting from the most embedded function call, how could we break this down more simply?
+
+I'll start us out.
+```{r, eval=FALSE}
+aa <- median(MTcars$disp)
+bb <- 
+cc <- 
+dd <- 
+ee <- 
+range(ee, na.rm = T) # Needs to output: [1] 105 335
+```
+
+#### Tidy Data
+
+Let's read in some YEG Open Data (that I've messed with), and take a look at it.
+
+```{r}
+LeisureAtt <- read.csv("LeisureAtt.csv") # Note we didn't use readr's read_csv()
+head(LeisureAtt)
+```
+
+This is the complete data set. What do you think of the layout? In some ways this data is fine (in fact it could even be better than the format we are about to learn). However, it violates the principles of 'tidy data'. Think about how this data should look to plot it most easily. If we have an `x` and a `y` axis to plot what would they be, and can we match a single variable to `x` and another to `y`? If we wanted to perform a single operation, like rounding to the nearest hundred, to all the important values (the attendance at each observation) how could the data be laid out to make this (and everything else we do to our data) easier?
+
+The principles of tidy data were described by Hadley Wickham and you can learn more about them [here](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html). The main principle of tidy data is that each variable is column and each observation is a row. Does the data above follow this principle? Even though the data above is easy to look at, and would probably how you would format the data in a presentation, it is not tidy.
+
+```{r}
+names(LeisureAtt) <- gsub("X", "", names(LeisureAtt)) # First let's get rid of that pesky "X"
+library(tidyr) # A package with tidying functions like gather(), and its reverse, spread()
+LeisureAtt <- gather(LeisureAtt, YEAR, ATTENDANCE, 2:7)
+head(LeisureAtt, 3)
+```
+Did this do what we want? Any problems? Let's take a look at a simple plot. (We'll cover plotting later).
+
+```{r}
+library(ggplot2) # function ggplot()
+ggplot(LeisureAtt, aes(x = MONTH, y = ATTENDANCE)) + geom_bar(stat = "identity") + theme(axis.text.x  = element_text(angle=60, hjust = 1, vjust=1, size=8)) + facet_wrap(~ YEAR, ncol = 3) 
+```
+Of course, we can fix this by changing the type of factor we have for `MONTH`.
+
+```{r}
+str(LeisureAtt$MONTH) # If we had used read_csv() this would be a character vector, but we wouldn't have had the "X" on the year names.
+levels(LeisureAtt$MONTH)
+LeisureAtt$MONTH <- factor(LeisureAtt$MONTH, levels = toupper(month.name)) # Note about the toupper(month.name)
+levels(LeisureAtt$MONTH)
+```
+```{r}
+head(LeisureAtt)
+```
+Still looks the same, but if we plot it again, we see that we get what we want.
+
+```{r}
+ggplot(LeisureAtt, aes(x = MONTH, y = ATTENDANCE)) + geom_bar(stat = "identity") + theme(axis.text.x  = element_text(angle=60, hjust = 1, vjust=1, size=8)) + facet_wrap(~ YEAR, ncol = 3) 
+```
+
+Because our data was tidy(ish), plotting is much simpler. The data for `x` and `y` are consolidated into separate columns. This might be harder for us to look at, but when we start dealing with larger datasets, 'looking' is not going to benefit us rather we will want to use plots or functions like `range()`, `summary()`, `mean()`, `summary()`, etc, to get a sense of what our dataset contains. These operations are much easier to run, and good for us conceptually, when variables are represented in single columns.
+
+#### Reading in Files from the Web
+
+Edmonton has a great open data portal, which you can find here: <https://data.edmonton.ca/>. Let's take a look at what the Leisure Centre Attendance dataset looked like when I found it.
+
+
+```{r}
+LeisureAttend <- read.csv(url("https://dashboard.edmonton.ca/api/views/iaa7-x8kk/rows.csv"))
+head(LeisureAttend, 5)[,c(2:5,7)] # I'm omitting some columns for aesthetic reasons
+```
+
+This dataset, unlike the one I created _mostly_ conforms with the principles of tidy data, but there is something else odd here. What is it and what can we do about it? Without thinking of functions, what are some way we could modify this dataframe?
+
+```{r}
+str(LeisureAttend)
+range(LeisureAttend$MONTHLY_ATTENDANCE)
+
+LeisureAttend <- filter(LeisureAttend, MONTHLY_ATTENDANCE != 0)
+```
+
+```{r}
+ggplot(LeisureAttend, aes(x = REPORT_PERIOD, y = MONTHLY_ATTENDANCE)) + geom_bar(stat = "identity") + theme(axis.text.x  = element_text(angle=60, hjust = 1, vjust=1, size=8))
+```
+
+We will do more with this data when we get to plotting.
+
+
+#### Renaming Values and Dealing with Factors
+
+What we are about to do is, in this case, completely unnecessary, but is useful to know. In the `MTcars` dataset some of the values are not very intuitive. Transmission type is denoted by a numeric value where it might be easier to read if those values were abbreviations like 'auto' and 'man'. (I always forget what `vs` means, - I think it is the cylinder arrangement inline cylinders or not.) Let's change the numeric values in `MTcars$am` to strings 'auto' and 'man'. And let's do this a slightly safer way.
+
+```{r}
+xx <- MTcars$am
+xx[xx == 0] <- "auto"
+xx[MTcars$am == 1] <- "man" # This is a bit odd to do, but I did it to illustrate a point. Please ask, why?
+MTcars$amChar <- xx # What did this do?
+rm(xx)
+identical((MTcars$am == 0), (MTcars$amChar == "auto"))
+table((MTcars$am == 0) == (MTcars$amChar == "auto"))
+```
+
+What if we wanted to create factor variable for engine size called `eng_size`, where engines with a displacement one standard deviation above than the mean are classed "big", below "small", and within "avr" for 'average'? We _could_ do this with a 'for' loop and some 'if/else' statements like below.
+
+```{r}
+xx <- character()
+for (i in 1:nrow(MTcars)) {
+	if (MTcars$disp[i] > (mean(MTcars$disp) + sd(MTcars$disp))) {
+		xx[i] <- "big"
+	} else if (MTcars$disp[i] < (mean(MTcars$disp) - sd(MTcars$disp))) {
+		xx[i] <- "small"
+	} else {
+		xx[i] <- "avr"
+	}
+}
+MTcars$eng_size <- factor(xx, levels = c("small", "avr", "big"), ordered = TRUE)
+str(MTcars$eng_size)
+```
+It is good to know about how to write 'for', 'while' and 'if' statements when you learn about programming in general, but I want to teach you how to use R. The way to use R properly is to avoid using these whenever possible. An experienced R programmer would know there is a function that does this for you (one that I should have, but did not know about for the first two years I used R). It is called `ifelse()`.
+
+```{r}
+# ifelse("Is this TRUE?", "Yes, so = ", "No, so = ")
+xx <- ifelse(MTcars$disp > (mean(MTcars$disp) + sd(MTcars$disp)), "big", ifelse(MTcars$disp < (mean(MTcars$disp) - sd(MTcars$disp)), "small", "avr"))
+xx <- factor(xx, levels = c("small", "avr", "big"), ordered = TRUE)
+identical(xx, MTcars$eng_size)
+```
+Not only is `ifelse()` easier to write and read (i.e., elegant), it is also much, much, much, much faster than using a 'for' loop. R is not a _fast_ programming language by any means. While `ifelse()` runs within R, many functions like those in the `dplyr` package actually run outside of R, in this case in C++. Finding a specific function in another R package can sometimes turn an hour of computational time into seconds, literally. (You can wrap a function call in `system.time()` to compare computation speeds).
+
+When we changed the zeros to "auto", the vector `xx` was changed into a character vector. If we try to do this with factors we will have trouble.
+```{r}
+xx <- MTcars$eng_size
+xx[xx == "big"] <- "large"
+```
+The solution here is to use a line of code like this:
+```{r}
+xx <- MTcars$eng_size
+levels(xx)[levels(xx) == "big"] <- "large"
+```
+Of course, we could also just turn `xx` into a character vector and modify it that way too.
+
+Factors also have another annoying habit. They will not go away even after they are removed. Let's pretend we only want the summer months from 'LeisureAttend`.
+```{r}
+LeisAttSummer <- filter(LeisureAttend, MONTH %in% c("JULY", "AUGUST", "SEPTEMBER"))
+str(LeisAttSummer$MONTH)
+```
+We still have a factor with 12 levels. The solution is to use `droplevels()`. We could have just added this onto the tail of the original `filter()` call.
+```{r}
+LeisAttSummer <- droplevels(filter(LeisureAttend, MONTH %in% c("JULY", "AUGUST", "SEPTEMBER")))
+str(LeisAttSummer$MONTH)
+```
+
+#### The Pipe: `%>%`
+
+The pipe was an innovation originally from the `magrittr` package, but is now frequently used in many packages especially `dplyr` and `tidyr`. Code can be conceptually hard to read as it typically becomes more and more embedded, meaning that the first thing your code is doing is usually in the centre within the innermost "()". With the pipe operator, you can mostly think of your code to mean "Take these data, and then (%>%), and then (%>%)... ". How would we re-write the code above without the pipe?
+
+```{r, eval = FALSE}
+LeisAttSummer <- 
+```
+
+## Next: Plotting Your Data
+
+
+

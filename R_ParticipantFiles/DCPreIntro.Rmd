@@ -1,0 +1,78 @@
+---
+title: 'DataCarpentry: Pre Intro'
+subtitle: "A Few Initial Considerations"
+author: "Brian Rusk"
+date: "July 12th & 13th, 2017"
+output:
+  ioslides_presentation:
+    widescreen: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+# Introduction
+
+## Why Use R?
+
+- Powerful
+- Free and Open Source
+- Helps with Reproducibility
+- Not as Hard as May Seem
+- Fun(?)
+
+## Why Might Someone Not Want to Use R?
+
+- Lacks a GUI
+- Has a Steep Initial Learning Curve
+- Frustration with Coding
+
+## Programming Mindset
+
+__Writing R code is not about knowing. It's about figuring out.__
+
+```{r, echo = FALSE}
+Level <- c("Beginner", "Intermediate", "Advanced")
+FigOut <- c(90, 80, 70)
+Know <- c(10, 20, 30)
+TimePlot <- data.frame(Level, FigOut, Know)
+TimePlot <- gather(TimePlot, Task, Prop, 2:3)
+TimePlot$Level <- factor(TimePlot$Level, levels = c("Beginner", "Intermediate", "Advanced"), ordered = TRUE)
+ggplot(TimePlot, aes(Level, Prop, fill = Task)) + 
+	geom_bar(stat = "identity") + 
+	scale_fill_discrete(name="Time Spent...",
+                         breaks=c("Know", "FigOut"),
+                         labels=c("Doing what you know", "Figuring stuff out")) + 
+	scale_x_discrete(name="") +
+     scale_y_continuous(name="Proportion of Time")
+```
+
+## Mindset 2
+
+Working with your data is a lot like writing an essay. There are always multiple ways of doing things, just like there are multiple ways of structuring information in a written paragraph.
+
+We don't estimate the time it will take to write an essay by dividing the number of words required by the number of words we can type per minute. The essay requires multiple decisions about how information will be structured and organized, and for what aim.
+
+R allows you to do the same with data, and after the initial stages of learning R, you will be spending most of your time figuring out what you are trying to acheive with your dataset, and then web searching for info about how to accomplish it.
+
+
+## Objectives
+
+It's okay if you...
+
+* ...come away not remembering a single function.
+* ...don't remember exactly _how_ we did something.
+
+It's more important that you get the general idea...
+
+* ...of how the interface works.
+* ...of what R can do.
+* ...of what we did with the datasets, and why.
+* ...that more specific tools (functions) are found in packages.
+* ...that Googling is your friend.
+
+# Let's Get to It!
