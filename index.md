@@ -226,13 +226,13 @@ eventbrite:  "45202577125"         # optional: alphanumeric key for Eventbrite r
   <div class="col-md-6">
     <h3>Day 2</h3>
     <table class="table table-striped">
-      <tr> <td>09:00</td>  <td><a href="http://www.datacarpentry.org/r-socialsci/">R and R Studio Part 1, 2, & 3 - Programming Language Fundamentals</a></td> </tr>
+      <tr> <td>09:00</td>  <td>Begin <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC1basics.html">R and R Studio Basics</a></td> </tr>
       <tr> <td>10:30</td>  <td>Break</td> </tr>
-      <tr> <td>10:45</td>  <td><a href="http://www.datacarpentry.org/r-socialsci/">R and R Studio Part 3 & 4 - Getting into Dataframes</a></td> </tr>
+      <tr> <td>10:45</td>  <td>Finish <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC1basics.html">R and R Studio Basics</a> and begin <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC2ReadClean.html"> Cleaning Data</a></td> </tr>
       <tr> <td>12:00</td>  <td>Lunch break</td> </tr>
-      <tr> <td>13:00</td>  <td><a href="http://www.datacarpentry.org/r-socialsci/">R and R Studio Part 4 & 5 - Getting into Data Visualization</a></td> </tr>
+      <tr> <td>13:00</td>  <td>Continuing <a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC2ReadClean.html"> Cleaning Data</a></td> </tr>
       <tr> <td>14:30</td>  <td>Coffee</td> </tr>
-      <tr> <td>14:45</td>  <td><a href="http://www.datacarpentry.org/r-socialsci/">R and R Studio Part 5 & 6 - Connecting Back to a Database</a></td> </tr>
+      <tr> <td>14:45</td>  <td><a href="https://computecanada.github.io/2018-05-09-ualberta-dc/R_ParticipantFiles/DC3Plots.html">Details of Plots</a></td> </tr>
       <tr> <td>16:00</td>  <td>Ending Day 2</td> </tr>
     </table>
   </div>
